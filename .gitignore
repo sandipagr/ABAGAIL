@@ -7,3 +7,6 @@ ABAGAIL.jar
 *.war
 *.ear
 manifest.mf
+.idea
+ABAGAIL.iml
+out/
