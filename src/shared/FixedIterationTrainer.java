@@ -37,6 +37,6 @@ public class FixedIterationTrainer implements Trainer {
         }
         return sum / iterations;
     }
-    
+
 
 }
