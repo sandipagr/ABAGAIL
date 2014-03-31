@@ -5,6 +5,7 @@ import dist.MultivariateGaussian;
 import func.KMeansClusterer;
 import shared.DataSet;
 import shared.Instance;
+import shared.test.FeatureSelectionUtil;
 import util.linalg.DenseVector;
 import util.linalg.RectangularMatrix;
 
@@ -19,19 +20,29 @@ public class KMeansClustererTest {
      * @param args ignored
      */
     public static void main(String[] args) throws Exception {
-        Instance[] instances = new Instance[100];
-        MultivariateGaussian mga = new MultivariateGaussian(new DenseVector(new double[] {10, 20, 30}), RectangularMatrix.eye(3).times(.5)); 
-        MultivariateGaussian mgb = new MultivariateGaussian(new DenseVector(new double[] {-2, -3, -1}), RectangularMatrix.eye(3).times(.4)); 
-        for (int i = 0; i < instances.length; i++) {
-            if (Distribution.random.nextBoolean()) {
-                instances[i] = mga.sample(null);   
-            } else {
-                instances[i] = mgb.sample(null);
-            }
+        String filename = "";
+        filename = "/src/shared/test/data/wine/winequality-%s.csv";
+        filename = "/src/shared/test/data/adult/adult-normalized-%s.csv";
+
+        String[] algos = {"ica"}; //, "isca", "pca", "rp"};
+        for (int i = 0; i < algos.length; i++) {
+            String algo = algos[i];
+
+            String file = String.format(filename, algo);
+
+            System.out.println(file);
+            long start = System.nanoTime();
+
+            DataSet set = FeatureSelectionUtil.getDataset(file);
+            KMeansClusterer km = new KMeansClusterer(2);
+            km.estimate(set);
+            long end = System.nanoTime();
+
+            System.out.println(km.mode());
+
+            //System.out.println(km);
+            //System.out.println(String.format("%f seconds", (end - start)/Math.pow(10.0, 9.0)));
         }
-        DataSet set = new DataSet(instances);
-        KMeansClusterer km = new KMeansClusterer();
-        km.estimate(set);
-        System.out.println(km);
+
     }
 }
