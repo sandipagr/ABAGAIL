@@ -12,34 +12,45 @@ import util.linalg.RectangularMatrix;
  * @version 1.0
  */
 public class IndepenentComponentAnalysisTest {
-    
-    /**
-     * The test main
-     * @param args ignored
-     */
-    public static void main(String[] args) {
-        Instance[] instances =  new Instance[100];
-        for (int i = 0; i < instances.length; i++) {
-            double[] data = new double[2];
-            data[0] = Math.sin(i/2.0);
-            data[1] = (Math.random() - .5)*2;
-            instances[i] = new Instance(data);
-        }
-        DataSet set = new DataSet(instances);
+
+    public String filename;
+
+    public IndepenentComponentAnalysisTest(String filename){
+        this.filename = filename;
+
+    }
+
+    public void run() {
+        DataSet set = FeatureSelectionUtil.getDataset(filename);
+
+
         System.out.println("Before randomizing");
-        System.out.println(set);
         Matrix projection = new RectangularMatrix(new double[][]{ {.6, .6}, {.4, .6}});
         for (int i = 0; i < set.size(); i++) {
             Instance instance = set.get(i);
             instance.setData(projection.times(instance.getData()));
         }
-        System.out.println("Before ICA");
-        System.out.println(set);
-        IndependentComponentAnalysis filter = new IndependentComponentAnalysis(set, 1);
+
+        FeatureSelectionUtil.writeFile(set, filename.split("\\.")[0] + "-pre-ica-2c.csv");
+
+        System.out.println("PRE ICA");
+        IndependentComponentAnalysis filter = new IndependentComponentAnalysis(set, 2);
         filter.filter(set);
         System.out.println("After ICA");
-        System.out.println(set);
+        FeatureSelectionUtil.writeFile(set, filename.split("\\.")[0] + "-ica-2c.csv");
           
+    }
+
+    public static void main(String[] args) {
+//        String filename = "/src/shared/test/data/wine/winequality.csv";
+        String filename = "/src/shared/test/data/adult/adult-normalized.csv";
+
+        long start = System.nanoTime();
+        IndepenentComponentAnalysisTest ica = new IndepenentComponentAnalysisTest(filename);
+        ica.run();
+        long end = System.nanoTime();
+
+        System.out.println(String.format("Took: %f seconds", (end - start)/Math.pow(10.0, 9.0)));
     }
 
 }

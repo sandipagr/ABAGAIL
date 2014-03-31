@@ -12,35 +12,49 @@ import util.linalg.Matrix;
  */
 public class PrincipalComponentAnalysisTest {
     
-    /**
-     * The test main
-     * @param args ignored
-     */
-    public static void main(String[] args) {
-        Instance[] instances =  {
-            new Instance(new double[] {1,1,0,0,0,0,0,0}),
-            new Instance(new double[] {0,0,1,1,1,0,0,0}),
-            new Instance(new double[] {0,0,0,0,1,1,1,1}),
-            new Instance(new double[] {1,0,1,0,1,0,1,0}),
-            new Instance(new double[] {1,1,0,0,1,1,0,0}),
-        };
-        DataSet set = new DataSet(instances);
+
+    public void run(String filename) {
+
+        long start = System.nanoTime();
+        DataSet set = FeatureSelectionUtil.getDataset(filename);
+
         System.out.println("Before PCA");
-        System.out.println(set);
-        PrincipalComponentAnalysis filter = new PrincipalComponentAnalysis(set);
+        PrincipalComponentAnalysis filter = new PrincipalComponentAnalysis(set, 2);
+
+        System.out.println("Eigenvalues");
         System.out.println(filter.getEigenValues());
+
+        System.out.println("Filter Matrix Projection Transpose");
         System.out.println(filter.getProjection().transpose());
         filter.filter(set);
+
         System.out.println("After PCA");
-        System.out.println(set);
+        FeatureSelectionUtil.writeFile(set, filename.split("\\.")[0] + "-pca.csv");
+
+        long end = System.nanoTime();
+
         Matrix reverse = filter.getProjection().transpose();
         for (int i = 0; i < set.size(); i++) {
             Instance instance = set.get(i);
             instance.setData(reverse.times(instance.getData()).plus(filter.getMean()));
         }
         System.out.println("After reconstructing");
-        System.out.println(set);
-        
+        FeatureSelectionUtil.writeFile(set, filename.split("\\.")[0] + "-pca-reconstruction.csv");
+        System.out.println(String.format("Took: %f seconds", (end - start)/Math.pow(10.0, 9.0)));
+
+    }
+
+
+    public static void main(String[] args) {
+//        String filename = "/src/shared/test/data/wine/winequality.csv";
+        String filename = "/src/shared/test/data/adult/adult-normalized.csv";
+
+        long start = System.nanoTime();
+        PrincipalComponentAnalysisTest ica = new PrincipalComponentAnalysisTest();
+        ica.run(filename);
+        long end = System.nanoTime();
+
+        System.out.println(String.format("Took: %f seconds", (end - start)/Math.pow(10.0, 9.0)));
     }
 
 }
